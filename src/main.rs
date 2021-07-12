@@ -1,62 +1,42 @@
-mod xinputwrapper;
-
-use std::fs::File;
-use std::thread::sleep;
-use std::time::Duration;
-
-use evdev_rs;
-
-use regex;
+use evdev::{self, Device, InputEvent, InputEventKind, Key};
 
 const XINPUT_DEVICE_NAME: &str = "USB HCT Keyboard";
 
 fn main() {
-    let mut input_dev = {
-        let input_dev_path = get_device_file_path().expect("can't figure out device path");
-        let input_dev_file = File::open(input_dev_path).expect("can't open event device, try sudo");
+    let mut keyboard: Vec<Device> = evdev::enumerate()
+        .filter(|dev| dev.name().unwrap_or_default().eq(XINPUT_DEVICE_NAME))
+        .map(|dev| {
+            println!("Device {:}:", dev.name().unwrap_or_default());
+            println!("\t{:?}", dev.supported_keys());
+            println!("\t{:?}", dev.supported_leds());
+            dev
+        })
+        .collect();
+    let keyboard = keyboard.first_mut().expect("No matching keyboard");
 
-        evdev_rs::Device::new_from_file(input_dev_file).expect("unable to open device")
-    };
+    'event_handling: loop {
+        let fetch = keyboard.fetch_events();
+        if let Ok(event_iter) = fetch {
+            let keys: Vec<InputEventKind> = event_iter
+                .filter(is_key_press)
+                .map(|event| event.kind())
+                .collect();
 
-    input_dev
-        .grab(evdev_rs::GrabMode::Grab)
-        .expect("grabbing failed");
-    println!("Grabbed!");
-
-    
-
-    sleep(Duration::from_secs(10));
-
-    input_dev
-        .grab(evdev_rs::GrabMode::Ungrab)
-        .expect("grabbed but returning failed!");
-    println!("Returned!");
-}
-
-
-
-fn get_device_file_path() -> Option<String> {
-    use std::process::Command;
-
-    let xinput = Command::new("xinput")
-        .arg("--list")
-        .output()
-        .expect("xinput not found.");
-
-    let regex = {
-        let mut expression = String::from(XINPUT_DEVICE_NAME);
-        expression.push_str("\\s+id=(\\d+)");
-
-        regex::Regex::new(expression.as_str()).expect("regex compilation failed")
-    };
-
-    let xstdout = String::from_utf8(xinput.stdout).expect("output contains invalid seq");
-
-    if let Some(res) = regex.captures(xstdout.as_str()) {
-        let id_number_string = res.get(1).expect("no group in static regex?").as_str();
-        Some("/dev/input/event".to_owned() + id_number_string)
-    } else {
-        None
+            for eventkind in keys {
+                if let InputEventKind::Key(key) = eventkind {
+                    println!("{:?}", key);
+                    if key == Key::KEY_ESC {
+                        break 'event_handling;
+                    }
+                }
+            }
+        }
     }
 }
 
+fn is_key_press(e: &InputEvent) -> bool {
+    (match e.kind() {
+        InputEventKind::Key(_) => true,
+        _ => false,
+    }) && (e.value() > 0)
+}
