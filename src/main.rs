@@ -8,7 +8,7 @@
 */
 mod inputs;
 
-use std::time::Duration;
+use std::{time::Duration, u64};
 
 use dbus::blocking::Connection;
 use evdev::Key;
@@ -31,7 +31,9 @@ fn on_keypress(key: Key) -> EventResult {
         | Key::KEY_END
         | Key::KEY_PAGEUP
         | Key::KEY_PAGEDOWN => { /* Switch to virtual desktop */ }
-        Key::KEY_UP | Key::KEY_DOWN | Key::KEY_LEFT | Key::KEY_RIGHT => { /* Switch desktop relative to current */
+        Key::KEY_UP | Key::KEY_DOWN | Key::KEY_LEFT | Key::KEY_RIGHT => {
+            /* Switch desktop relative to current */
+            trigger_expo();
         }
         _ => {}
     };
@@ -48,7 +50,6 @@ fn on_keyrelease(key: Key) -> EventResult {
 
 const DBUS_COMPIZ_ROOT: &str = "org.freedesktop.compiz";
 const DBUS_EXPO_KEY: &str = "/org/freedesktop/compiz/expo/allscreens/expo_key";
-const DBUS_COMPIZ_ACTIVATE: &str = "org.freedesktop.compiz.activate";
 
 /// The command to do this from the command line is:
 ///
@@ -61,20 +62,37 @@ const DBUS_COMPIZ_ACTIVATE: &str = "org.freedesktop.compiz.activate";
 ///
 fn trigger_expo() {
     let conn = Connection::new_session().expect("D-Bus connection failed");
-    let proxy = conn.with_proxy(DBUS_COMPIZ_ROOT, "/org/freedesktop/compiz/expo/allscreens/expo_key", Duration::from_secs(3));
+    let proxy = conn.with_proxy(DBUS_COMPIZ_ROOT, DBUS_EXPO_KEY, Duration::from_secs(3));
 
-    let result: Result<(), dbus::Error> = proxy.method_call("org.freedesktop.compiz", "activate", ("root", 0x1db));
+    let result: Result<(), dbus::Error> = proxy.method_call(
+        "org.freedesktop.compiz",
+        "activate",
+        ("root", xorg_root_id() as i32),
+    );
+
+    println!("{:?}", result);
 
     result.expect("call failed");
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+use x11::xlib::{XOpenDisplay, XDefaultRootWindow};
 
-    #[test]
-    fn test_expo_trigger() {
-        println!("Triggering Expo");
-        trigger_expo();
+const XORG_DISPLAY: &str = ":0";
+
+fn xorg_root_id() -> u64 {
+    let display = std::ffi::CString::new(XORG_DISPLAY).expect("wrong conversion");
+
+    unsafe {
+        let xdisplay = XOpenDisplay(display.as_ptr());
+
+        let root_id = XDefaultRootWindow(xdisplay);
+
+        root_id
     }
+}
+
+#[test]
+fn test_expo_trigger() {
+    println!("Triggering Expo");
+    trigger_expo();
 }
