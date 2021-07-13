@@ -27,11 +27,9 @@ fn on_keypress(key: Key) -> EventResult {
         | Key::KEY_DELETE
         | Key::KEY_END
         | Key::KEY_PAGEUP
-        | Key::KEY_PAGEDOWN => { /* Switch to virtual desktop */ },
-        Key::KEY_UP 
-        | Key::KEY_DOWN 
-        | Key::KEY_LEFT 
-        | Key::KEY_RIGHT => { /* Switch desktop relative to current */ },
+        | Key::KEY_PAGEDOWN => { /* Switch to virtual desktop */ }
+        Key::KEY_UP | Key::KEY_DOWN | Key::KEY_LEFT | Key::KEY_RIGHT => { /* Switch desktop relative to current */
+        }
         _ => {}
     };
 
@@ -43,4 +41,36 @@ fn on_keypress(key: Key) -> EventResult {
 
 fn on_keyrelease(key: Key) -> EventResult {
     EventResult::Continue
+}
+
+const DBUS_COMPIZ_ROOT : &str = "org.freedesktop.compiz";
+const DBUS_EXPO_KEY : &str = "/org/freedesktop/compiz/expo/allscreens/expo_key";
+const DBUS_COMPIZ_ACTIVATE : &str = "org.freedesktop.compiz.activate";
+
+/// The command to do this from the command line is:
+///
+/// dbus-send --print-reply --type=method_call --dest=org.freedesktop.compiz
+///  /org/freedesktop/compiz/expo/allscreens/expo_key
+///  org.freedesktop.compiz.activate string:'root'
+///  int32:`xwininfo -root | grep id: | awk '{ print $4 }'`
+///
+/// For sanity reasons, though, I'm using d-bus interface directly.
+/// 
+#[test]
+fn trigger_expo() {
+    let conn = Connection::new_session()?;
+    let proxy = conn.with_proxy(DBUS_COMPIZ_ROOT, "/", Duration::from_millis(5000));
+    let (names,): (Vec<String>,) = proxy.method_call(DBUS_EXPO_KEY, DBUS_COMPIZ_ACTIVATE , ())?;
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_expo_trigger() {
+        println!("Triggering Expo");
+        trigger_expo();
+    }
 }
