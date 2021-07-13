@@ -20,8 +20,24 @@ fn main() {
 fn on_keypress(key: Key) -> EventResult {
     let mut do_exit = false;
 
+    /* Using the fact that the range covered is continuous, I preface multiple
+      comparisons with a range check beforehand. The evdev scancodes are kind
+      of... frantically laid out:
+    
+        KEY_HOME = 102,
+        KEY_UP = 103,
+        KEY_PAGEUP = 104,
+        KEY_LEFT = 105,
+        KEY_RIGHT = 106,
+        KEY_END = 107,
+        KEY_DOWN = 108,
+        KEY_PAGEDOWN = 109,
+        KEY_INSERT = 110,
+        KEY_DELETE = 111,
+    */
     match key {
         Key::KEY_ESC => do_exit = true, // exit program
+        Key::HOME..Key::KEY_DELETE => match key {
         Key::KEY_INSERT
         | Key::KEY_HOME
         | Key::KEY_DELETE
@@ -32,6 +48,7 @@ fn on_keypress(key: Key) -> EventResult {
         | Key::KEY_DOWN 
         | Key::KEY_LEFT 
         | Key::KEY_RIGHT => { /* Switch desktop relative to current */ },
+        }
         _ => {}
     };
 
