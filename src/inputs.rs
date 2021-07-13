@@ -36,10 +36,15 @@ pub(crate) fn disable_device(device: &Device) {
     };
 }
 
+pub enum EventResult {
+    Continue,
+    Exit
+}
+
 ///
 /// Synchronously handles each keypress, delegating it to appropriate handlers.
 /// 
-pub(crate) fn watch_keys(keyboard: &mut Device, keypress_handler : &dyn Fn(Key) -> (),  keyrelease_handler : &dyn Fn(Key) -> ()) {
+pub(crate) fn watch_keys(keyboard: &mut Device, keypress_handler : &dyn Fn(Key) -> EventResult,  keyrelease_handler : &dyn Fn(Key) -> EventResult) {
     'event_handling: loop {
         let fetch = keyboard.fetch_events();
         if let Ok(event_iter) = fetch {
@@ -51,7 +56,7 @@ pub(crate) fn watch_keys(keyboard: &mut Device, keypress_handler : &dyn Fn(Key) 
             for eventkind in keys {
                 if let InputEventKind::Key(key) = eventkind {
                     println!("{:?}", key);
-                    if key == Key::KEY_ESC {
+                    if let EventResult::Exit = keypress_handler(key) {
                         break 'event_handling;
                     }
                 }
