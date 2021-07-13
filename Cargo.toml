@@ -3,7 +3,7 @@ name = "ss-utilitykeyboardhandler"
 version = "0.1.0"
 authors = ["ST92 <marsdprogrammer@gmail.com>"]
 edition = "2018"
-links = "X11"
+links = "X11,xdo"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -13,3 +13,4 @@ evdev = "0.11.*"
 regex = "1.*"
 dbus = "0.9.*"
 x11 = "2.18.2"
+libxdo = "0.6.0"
