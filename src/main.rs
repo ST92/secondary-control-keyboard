@@ -8,6 +8,9 @@
 */
 mod inputs;
 
+use std::time::Duration;
+
+use dbus::blocking::Connection;
 use evdev::Key;
 use inputs::{disable_device, get_keyboard, watch_keys, EventResult};
 
@@ -43,9 +46,9 @@ fn on_keyrelease(key: Key) -> EventResult {
     EventResult::Continue
 }
 
-const DBUS_COMPIZ_ROOT : &str = "org.freedesktop.compiz";
-const DBUS_EXPO_KEY : &str = "/org/freedesktop/compiz/expo/allscreens/expo_key";
-const DBUS_COMPIZ_ACTIVATE : &str = "org.freedesktop.compiz.activate";
+const DBUS_COMPIZ_ROOT: &str = "org.freedesktop.compiz";
+const DBUS_EXPO_KEY: &str = "/org/freedesktop/compiz/expo/allscreens/expo_key";
+const DBUS_COMPIZ_ACTIVATE: &str = "org.freedesktop.compiz.activate";
 
 /// The command to do this from the command line is:
 ///
@@ -55,14 +58,15 @@ const DBUS_COMPIZ_ACTIVATE : &str = "org.freedesktop.compiz.activate";
 ///  int32:`xwininfo -root | grep id: | awk '{ print $4 }'`
 ///
 /// For sanity reasons, though, I'm using d-bus interface directly.
-/// 
-#[test]
+///
 fn trigger_expo() {
-    let conn = Connection::new_session()?;
-    let proxy = conn.with_proxy(DBUS_COMPIZ_ROOT, "/", Duration::from_millis(5000));
-    let (names,): (Vec<String>,) = proxy.method_call(DBUS_EXPO_KEY, DBUS_COMPIZ_ACTIVATE , ())?;
-}
+    let conn = Connection::new_session().expect("D-Bus connection failed");
+    let proxy = conn.with_proxy(DBUS_COMPIZ_ROOT, "/org/freedesktop/compiz/expo/allscreens/expo_key", Duration::from_secs(3));
 
+    let result: Result<(), dbus::Error> = proxy.method_call("org.freedesktop.compiz", "activate", ("root", 0x1db));
+
+    result.expect("call failed");
+}
 
 #[cfg(test)]
 mod tests {
