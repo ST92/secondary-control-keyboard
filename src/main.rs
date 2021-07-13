@@ -11,7 +11,7 @@ use evdev::{self, Device, InputEvent, InputEventKind, Key};
 fn main() {
     let mut keyboard = get_keyboard();
     disable_device(&keyboard);
-    watch_keys_loop(&mut keyboard);
+    watch_keys(&mut keyboard);
 }
 
 ///
@@ -53,7 +53,7 @@ fn disable_device(device: &Device) {
 ///
 /// Synchronously handles each keypress, delegating it to appropriate handlers.
 /// 
-fn watch_keys_loop(keyboard: &mut Device) {
+fn watch_keys(keyboard: &mut Device) {
     'event_handling: loop {
         let fetch = keyboard.fetch_events();
         if let Ok(event_iter) = fetch {
