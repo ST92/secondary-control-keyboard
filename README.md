@@ -4,7 +4,19 @@
 Welcome to Keyboard Control Panel, or **KeyCoP**
 
 This program turns your second keyboard into your personal physical control panel.
-It intercepts all events from specified device(s) and lets me program it to whatever I might want. Currently it allows me to switch between my virtual desktops.
+It intercepts all events from specified device(s) and lets me program it to whatever I might want.
+
+Currently it allows me to switch between my virtual desktops.
+
+Additionally it will run executables at '~/.config/keycop/bind/just/<keyname>'
+provided that they're there and execute permissions are set. For instance, to
+trigger system reboot upon pressing key [,] ("comma") make a symbolic link to
+your reboot binary as such:
+
+    ln -s $(which reboot) ~/.config/keycop/bind/just/comma
+
+More generally you can put any executable there, and it will spawn asynchronously
+and will share the stdin, stdout and stderr with the **keycop** process
 
 == Building ==
 ==============
