@@ -29,7 +29,7 @@ fn on_keypress(key: Key) -> EventResult {
         | Key::KEY_END
         | Key::KEY_PAGEUP
         | Key::KEY_PAGEDOWN => {
-            /* Switch to specific virtual desktop */ 
+            /* Switch to specific virtual desktop */
             xorg_functionality::trigger_expo();
 
             // My local geometry is 3 wide x 2 tall virtual desktops
@@ -39,14 +39,19 @@ fn on_keypress(key: Key) -> EventResult {
             expo_move_relative(Direction::Left);
 
             match key {
-                Key::KEY_DELETE | Key::KEY_END | Key::KEY_PAGEDOWN => expo_move_relative(Direction::Down),
-                _ => ()
+                Key::KEY_DELETE | Key::KEY_END | Key::KEY_PAGEDOWN => {
+                    expo_move_relative(Direction::Down);
+                }
+                _ => (),
             }
 
             match key {
                 Key::KEY_HOME | Key::KEY_END => expo_move_relative(Direction::Right),
-                Key::KEY_PAGEUP | Key::KEY_PAGEDOWN => {expo_move_relative(Direction::Right); expo_move_relative(Direction::Right)},
-                _ => ()
+                Key::KEY_PAGEUP | Key::KEY_PAGEDOWN => {
+                    expo_move_relative(Direction::Right);
+                    expo_move_relative(Direction::Right);
+                }
+                _ => (),
             }
 
             xorg_functionality::trigger_expo();
@@ -71,7 +76,11 @@ fn on_keyrelease(key: Key) -> EventResult {
 }
 
 enum Direction {
-    Left, Right, Up, Down, Stay
+    Left,
+    Right,
+    Up,
+    Down,
+    Stay,
 }
 
 impl From<Key> for Direction {
@@ -81,7 +90,7 @@ impl From<Key> for Direction {
             Key::KEY_RIGHT => Self::Right,
             Key::KEY_UP => Self::Up,
             Key::KEY_DOWN => Self::Down,
-            _ => Self::Stay
+            _ => Self::Stay,
         }
     }
 }
@@ -93,18 +102,17 @@ impl Into<&str> for Direction {
             Self::Right => "Right",
             Self::Up => "Up",
             Self::Down => "Down",
-            _ => ""
+            _ => "",
         }
     }
 }
 
+// FIXME: maybe send multiple keys with one call?
 fn expo_move_relative(direction: Direction) {
     let xdo = libxdo::XDo::new(Some(xorg_functionality::XORG_DISPLAY)).expect("xdo acquire failed");
-    xdo.send_keysequence(direction.into(), 0)
+    xdo.send_keysequence(direction.into(), 1000)
         .expect("unable to simulate key");
-    
 }
-
 
 #[test]
 fn test_traverse_expo() {
