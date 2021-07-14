@@ -5,8 +5,6 @@ use dbus::blocking::Connection;
 const DBUS_COMPIZ_ROOT: &str = "org.freedesktop.compiz";
 const DBUS_EXPO_KEY: &str = "/org/freedesktop/compiz/expo/allscreens/expo_key";
 
-pub const XORG_DISPLAY: &str = ":0";
-
 /// The command to do this from the command line is:
 ///
 /// dbus-send --print-reply --type=method_call --dest=org.freedesktop.compiz
@@ -37,7 +35,7 @@ pub fn trigger_expo() {
 fn xorg_root_id() -> u64 {
     use x11::xlib::{XOpenDisplay, XRootWindow};
 
-    let display = std::ffi::CString::new(XORG_DISPLAY).expect("wrong conversion");
+    let display = std::ffi::CString::new(crate::config::XORG_DISPLAY).expect("wrong conversion");
 
     unsafe {
         let xdisplay = XOpenDisplay(display.as_ptr());

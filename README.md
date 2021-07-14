@@ -1,6 +1,8 @@
 == Premise ==
 =============
 
+Welcome to Keyboard Control Panel, or **KeyCoP**
+
 This program turns your second keyboard into your personal physical control panel.
 It intercepts all events from specified device(s) and lets me program it to whatever I might want. Currently it allows me to switch between my virtual desktops.
 
@@ -8,7 +10,7 @@ It intercepts all events from specified device(s) and lets me program it to what
 ==============
 
 Requires x11-devel (Fedora) or equivalent XOrg headers.
-Requires libxdo-devel (Fedora) or equivalend xdo headers.
+Requires libxdo-devel (Fedora) or equivalend libxdo headers.
 
 == Running ==
 =============

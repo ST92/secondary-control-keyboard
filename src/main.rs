@@ -12,6 +12,20 @@ mod xorg_functionality;
 use evdev::Key;
 use inputs::{disable_device, get_keyboard, watch_keys, EventResult};
 
+mod config {
+    ///
+    /// The keyboard device name in question. It might be different, and most likely
+    /// will be different on any system other than mine.
+    ///
+    pub const KEYBOARD_IDENTIFIER : &str = "USB HCT Keyboard";
+
+    ///
+    /// XOrg display identifier. 
+    /// :0 means first screen on local machine.
+    ///
+    pub const XORG_DISPLAY: &str = ":0";
+}
+
 fn main() {
     let mut keyboard = get_keyboard();
     disable_device(&keyboard);
@@ -109,7 +123,7 @@ impl Into<&str> for Direction {
 
 // FIXME: maybe send multiple keys with one call?
 fn expo_move_relative(direction: Direction) {
-    let xdo = libxdo::XDo::new(Some(xorg_functionality::XORG_DISPLAY)).expect("xdo acquire failed");
+    let xdo = libxdo::XDo::new(Some(crate::config::XORG_DISPLAY)).expect("xdo acquire failed");
     xdo.send_keysequence(direction.into(), 1000)
         .expect("unable to simulate key");
 }
@@ -117,7 +131,7 @@ fn expo_move_relative(direction: Direction) {
 #[test]
 fn test_traverse_expo() {
     xorg_functionality::trigger_expo();
-    let xdo = libxdo::XDo::new(Some(xorg_functionality::XORG_DISPLAY)).expect("xdo acquire failed");
+    let xdo = libxdo::XDo::new(Some(crate::config::XORG_DISPLAY)).expect("xdo acquire failed");
     xdo.send_keysequence("Right", 0)
         .expect("unable to press right key");
     xorg_functionality::trigger_expo();

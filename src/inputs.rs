@@ -1,18 +1,14 @@
 use evdev::{self, Device, InputEvent, InputEventKind, Key};
 
 ///
-/// The keyboard device name in question. It might be different, and most likely
-/// will be different on any system other than mine.
-///
-const XINPUT_DEVICE_NAME: &str = "USB HCT Keyboard";
-
-///
 /// Pick out the secondary keyboard (as opposed to a main keyboard) from the
 /// xinput device list.
 ///
 pub(crate) fn get_keyboard() -> Device {
+    
+
     let mut keyboard: Vec<Device> = evdev::enumerate()
-        .filter(|dev| dev.name().unwrap_or_default().eq(XINPUT_DEVICE_NAME))
+        .filter(|dev| dev.name().unwrap_or_default().eq(crate::config::KEYBOARD_IDENTIFIER))
         .collect();
 
     let keyboard = keyboard.pop().expect("No matching keyboards!");
