@@ -5,7 +5,7 @@ use dbus::blocking::Connection;
 const DBUS_COMPIZ_ROOT: &str = "org.freedesktop.compiz";
 const DBUS_EXPO_KEY: &str = "/org/freedesktop/compiz/expo/allscreens/expo_key";
 
-const XORG_DISPLAY: &str = ":0";
+pub const XORG_DISPLAY: &str = ":0";
 
 /// The command to do this from the command line is:
 ///
@@ -17,11 +17,13 @@ const XORG_DISPLAY: &str = ":0";
 /// For sanity reasons, though, I'm using d-bus interface directly.
 ///
 pub fn trigger_expo() {
-    let conn = Connection::new_session().expect("D-Bus connection failed");
+    let conn = Connection::new_session()
+        .expect("D-Bus connection failed");
+
     let proxy = conn.with_proxy(DBUS_COMPIZ_ROOT, DBUS_EXPO_KEY, Duration::from_secs(3));
 
     let result: Result<(), dbus::Error> = proxy.method_call(
-        "org.freedesktop.compiz",
+        DBUS_COMPIZ_ROOT,
         "activate",
         ("root", xorg_root_id() as i32),
     );
@@ -29,19 +31,18 @@ pub fn trigger_expo() {
     result.expect("call failed");
 }
 
-
 ///
 /// Retrieve root window identifier from X11 runtime
 ///
 fn xorg_root_id() -> u64 {
-    use x11::xlib::{XOpenDisplay, XDefaultRootWindow};
+    use x11::xlib::{XOpenDisplay, XRootWindow};
 
     let display = std::ffi::CString::new(XORG_DISPLAY).expect("wrong conversion");
 
     unsafe {
         let xdisplay = XOpenDisplay(display.as_ptr());
 
-        let root_id = XDefaultRootWindow(xdisplay);
+        let root_id = XRootWindow(xdisplay, 0);
 
         root_id
     }
