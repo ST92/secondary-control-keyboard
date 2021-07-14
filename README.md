@@ -1,14 +1,17 @@
 == Premise ==
+=============
 
 This program turns your second keyboard into your personal physical control panel.
 It intercepts all events from specified device(s) and lets me program it to whatever I might want. Currently it allows me to switch between my virtual desktops.
 
 == Building ==
+==============
 
 Requires x11-devel (Fedora) or equivalent XOrg headers.
 Requires libxdo-devel (Fedora) or equivalend xdo headers.
 
 == Running ==
+=============
 
 To run this with full functionality you need to:
 
@@ -18,3 +21,10 @@ To run this with full functionality you need to:
 - run compiz window decorator with both "Expo" and "D-Bus" plugins enabled
 - have virtual desktops configured in a grid (currently hardcoded 2 rows by 3 columns)
 - run the program, and keep it running
+
+== TO DO ==
+===========
+
+- make keyboard identifier configurable
+- add more functionality!
+- add GUI configurator
