@@ -1,7 +1,7 @@
 == Premise ==
 
 This program turns your second keyboard into your personal physical control panel.
-Currently it
+It intercepts all events from specified device(s) and lets me program it to whatever I might want. Currently it allows me to switch between my virtual desktops.
 
 == Building ==
 
