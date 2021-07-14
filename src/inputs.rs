@@ -40,7 +40,7 @@ pub enum EventResult {
 ///
 /// Synchronously handles each keypress, delegating it to appropriate handlers.
 /// 
-pub(crate) fn watch_keys(keyboard: &mut Device, keypress_handler : &dyn Fn(Key) -> EventResult,  keyrelease_handler : &dyn Fn(Key) -> EventResult) {
+pub(crate) fn watch_keys(keyboard: &mut Device, keypress_handler : &dyn Fn(Key) -> EventResult,  _keyrelease_handler : &dyn Fn(Key) -> EventResult) {
     'event_handling: loop {
         let fetch = keyboard.fetch_events();
         if let Ok(event_iter) = fetch {
@@ -51,7 +51,12 @@ pub(crate) fn watch_keys(keyboard: &mut Device, keypress_handler : &dyn Fn(Key) 
 
             for eventkind in keys {
                 if let InputEventKind::Key(key) = eventkind {
-                    println!("{:?}", key);
+
+                    // TODO: make it a compile-time check?
+                    if crate::config::DEBUG_INFO {
+                        println!("{:?}", key);
+                    }
+                    
                     if let EventResult::Exit = keypress_handler(key) {
                         break 'event_handling;
                     }
