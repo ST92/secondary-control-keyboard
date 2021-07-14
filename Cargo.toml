@@ -1,14 +1,17 @@
 [package]
 name = "ss-utilitykeyboardhandler"
-version = "0.1.0"
+version = "0.9.9"
 authors = ["ST92 <marsdprogrammer@gmail.com>"]
 edition = "2018"
 links = "X11,xdo"
 
+[[bin]]
+name = "keyboard-control-panel"
+path = "src/main.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-systemd = "0.9.*"
 evdev = "0.11.*"
 regex = "1.*"
 dbus = "0.9.*"
